@@ -1,161 +1,158 @@
-🚀 Developer Portfolio Website – Installation & Deployment Guide 
+# Portfólio — Bia Ferraz (Designer Gráfico & Visual)
 
-This guide will help you install, run, and deploy the portfolio website built with React, Vite, Tailwind CSS, and Framer Motion.
- It is designed to be beginner-friendly and comes with comments in the code so you can easily understand what each part does and customize it as you like.
+Portfólio interativo em **Next.js 16 (App Router)**, **React**, **TypeScript**, **Tailwind CSS v4** e **GSAP** — conceito visual "designer gráfico colorido com a espinha dorsal de um back-end": paleta pastel vibrante combinada com elementos de sistema (terminal funcional, cards de projeto como respostas de API, status codes, paths de arquivo).
 
-🔹 1. Prerequisites
-Before starting, make sure you have the following installed on your computer:
-Node.js (v18 or later) → Download here
+## ✨ Conceito
 
+- **Paleta pastel Memphis-suave**: lilás, rosa, amarelo manteiga, menta e azul céu sobre fundo papel — todas as combinações de cor/texto testadas e aprovadas em contraste WCAG AA/AAA.
+- **Camada "back-end" sutil**: breadcrumb de navegação tipo path de arquivo (`/usr/biaferraz/projetos`), cards de projeto com cabeçalho de método HTTP + status (`GET /projetos/x` · `200 OK`), botão "ver log" que expande um terminal com `git log` e `curl -I` simulados, skills como `console.log()`.
+- **Terminal interativo de verdade** no Hero — o elemento de assinatura do design. Funciona com teclado, tem histórico (↑/↓) e comandos reais.
+- **Animações GSAP** em todas as seções: entrada do hero com timeline orquestrada (formas pastel + texto em cortina + terminal), scroll-reveal com stagger nos projetos e seções, formas ambiente com loop infinito sutil.
 
-npm (comes with Node.js) or yarn as your package manager
+## 🚀 Como rodar
 
+Pré-requisito: [Node.js](https://nodejs.org) 18.18+.
 
-A code editor (recommended: Visual Studio Code)
-
-
-Basic understanding of Git (optional but useful)
-
-
-
-🔹 2. Running the Portfolio Locally
-Step 1: Download the Project
-Download the source code (ZIP file) from the package you received.
-
-
-Extract the ZIP file into a folder on your computer.
- Example: C:\Users\YourName\Documents\portfolio
-
-
-Step 2: Open in VS Code
-Open Visual Studio Code (or any editor you use).
-
-
-Click File → Open Folder → select the extracted folder.
-
-
-Step 3: Install Dependencies
-Open a terminal inside VS Code and run:
+```bash
 npm install
-
-This will install all the required node modules.
-Step 4: Run the Development Server
-Start the local development server with:
 npm run dev
+```
 
-You’ll see a message like:
- Local: http://localhost:5173/
+Abra [http://localhost:3000](http://localhost:3000).
+
+Build de produção:
+
+```bash
+npm run build
+npm run start
+```
+
+> **Fontes:** Space Grotesk (display), Inter (corpo) e IBM Plex Mono (camada "sistema") são carregadas via `@import` no `app/globals.css`, com fallback de sistema — não trava o build mesmo sem acesso à internet.
+
+## 🖥️ O terminal interativo
+
+No Hero, o terminal aceita comandos reais. Para adicionar novos comandos, edite `terminalCommands` em `lib/data.ts`:
+
+```ts
+export const terminalCommands = {
+  "meu-comando": {
+    output: ["linha 1 da resposta", "linha 2 da resposta"],
+  },
+  // ...
+};
+```
+
+Comandos disponíveis por padrão: `help`, `whoami`, `ls projetos`, `cat sobre.txt`, `clear`.
+
+## ✏️ Personalizando o conteúdo
+
+Tudo fica em **`lib/data.ts`**:
+
+| O que mudar | Onde |
+|---|---|
+| Nome, cargo, bio, e-mail, redes | `profile` |
+| Stack de ferramentas (Figma, Illustrator...) | `profile.stack` |
+| Projetos (título, descrição, tags, status, cor) | `projects` |
+| Paleta de cores por categoria de projeto | `colorTokens` |
+| Comandos do terminal | `terminalCommands` |
+| Itens do menu | `nav` |
+
+### Cor por projeto
+
+Cada projeto tem um campo `color` que aponta para uma chave de `colorTokens` (`lilac`, `rose`, `butter`, `mint`, `sky`). Essa cor aparece como barra lateral no card — pense nela como uma "tag de categoria" visual.
+
+## 🎨 Personalizando a paleta
+
+As cores globais estão em `app/globals.css`, no bloco `:root`. Cada tom pastel tem um par `--cor` (fundo) e `--cor-text` (texto com contraste garantido sobre aquele fundo) — se for trocar uma cor, ajuste o par junto para manter a acessibilidade:
+
+```css
+--lilac: #d9c8f0;
+--lilac-text: #3d2e5c;
+```
+
+## 📦 Estrutura
+
+```
+app/
+  layout.tsx        → metadata, layout raiz
+  globals.css        → design tokens (cores, fontes)
+  page.tsx
+components/
+  Navbar.tsx          → breadcrumb de navegação
+  Terminal.tsx         → terminal interativo
+  Footer.tsx
+  sections/
+    Hero.tsx           → timeline GSAP de entrada
+    Projects.tsx        → cards estilo API response
+    About.tsx           → bio + stack estilo console.log
+    Contact.tsx          → formulário estilo POST request
+lib/
+  data.ts              → todo o conteúdo do site
+  gsap-config.ts        → setup centralizado do GSAP/ScrollTrigger
+```
+
+## 📬 Back-end do formulário de contato (envio de e-mail real)
+
+O formulário da seção de Contato é conectado a uma **API Route real** em `app/api/contato/route.ts`, que usa a [Resend](https://resend.com) para enviar o e-mail de verdade. Sem essa configuração, o formulário mostra um erro tratado (não falha silenciosamente).
+
+### Configurando a Resend (gratuito para começar)
+
+1. Crie uma conta em [resend.com](https://resend.com)
+2. Em **API Keys**, gere uma chave (algo como `re_xxxxxxxxxxxx`)
+3. Copie `.env.example` para `.env.local`:
+   ```bash
+   cp .env.example .env.local
+   ```
+4. Cole sua chave no `.env.local`:
+   ```
+   RESEND_API_KEY=re_sua_chave_aqui
+   ```
+5. Abra `app/api/contato/route.ts` e troque `TO_EMAIL` para o e-mail que deve **receber** as mensagens:
+   ```ts
+   const TO_EMAIL = "seuemail@dominio.com";
+   ```
+
+### Sobre o remetente (`FROM_EMAIL`)
+
+Por padrão, o código usa `onboarding@resend.dev` — um endereço de teste que a própria Resend fornece, **funciona sem configuração extra**, mas só envia para o e-mail cadastrado na sua conta Resend (bom para testar).
+
+Para produção (receber de qualquer pessoa que usar o formulário), você precisa:
+1. Verificar um domínio próprio em **Domains** no painel da Resend (adicionar registros DNS — leva minutos)
+2. Trocar `FROM_EMAIL` em `route.ts` para usar esse domínio:
+   ```ts
+   const FROM_EMAIL = "Portfólio <contato@seudominio.com>";
+   ```
+
+### Testando localmente
+
+```bash
+npm run dev
+```
+
+Preencha o formulário em `http://localhost:3000#contato` e envie. Se tudo estiver certo, você recebe o e-mail e a tela mostra a confirmação `201 CREATED`.
+
+### Deploy (Vercel)
+
+Ao fazer deploy, adicione a variável de ambiente no painel da Vercel: **Settings → Environment Variables → `RESEND_API_KEY`**. O arquivo `.env.local` nunca é enviado ao Git (está no `.gitignore`), então essa variável precisa ser configurada manualmente em cada ambiente.
+
+### O que a rota já trata
+
+- Validação de campos obrigatórios (`name`, `email`, `message`) e formato de e-mail → `422`
+- JSON malformado no corpo da requisição → `400`
+- Chave da Resend ausente ou inválida → erro claro, sem crashar o servidor
+- Erros inesperados → `500`, logados no servidor (não expostos ao usuário)
+- Escapa o HTML do nome/mensagem antes de montar o corpo do e-mail (evita injeção)
 
 
-Open that link in your browser → 🎉 Your portfolio is live locally!
 
+```bash
+npm install -g vercel
+vercel
+```
 
+## 📝 Próximos passos sugeridos
 
-🔹 3. Customizing the Portfolio
-The project is written in React + Tailwind + Framer Motion and has comments in every file to explain what’s happening.
-You can easily customize:
-Personal details → Change your name, bio, and skills in the About component.
-
-
-Projects → Update Projects.jsx with your own work and links.
-
-
-Colors & Fonts → Modify index.css for theme customization.
-
-
-Animations → Controlled with Framer Motion (already explained in comments).
-
-
-👉 Every section in the code is commented, so you’ll know exactly what to edit.
-
-🔹 4. Deploying the Portfolio (Free Hosting)
-You can make your portfolio live on the internet for free using Vercel or Netlify.
-✅ Option A: Deploy on Vercel
-Go to https://vercel.com and sign up with GitHub/Google.
-
-
-Click “New Project” → Import your portfolio project from GitHub.
-
-
-(If you don’t use GitHub, you can upload the project directly.)
-
-
-Vercel will auto-detect Vite + React and set everything up.
-
-
-Click Deploy → Wait for a minute → Your portfolio is live at:
- https://your-portfolio.vercel.app
-
-
-
-✅ Option B: Deploy on Netlify
-Go to https://netlify.com and sign up.
-
-
-Click “Add New Site” → Import Project.
-
-
-Select your GitHub repo (or upload the build folder).
-
-
-Build settings:
-
-
-Build command: npm run build
-
-
-Publish directory: dist
-
-
-Click Deploy Site → Your portfolio will be live at:
- https://your-portfolio.netlify.app
-
-
-
-🔹 5. Using a Custom Professional Domain
-If you want a professional domain like yourname.com:
-Step 1: Buy a Domain
-Purchase from Namecheap, GoDaddy, Hostinger, Google Domains, etc.
-
-
-Step 2: Connect to Hosting (Vercel/Netlify)
-Go to your hosting dashboard (Vercel or Netlify).
-
-
-Find Domain Settings → Add Custom Domain.
-
-
-Enter your domain (e.g., yourname.com).
-
-
-Update DNS settings from your domain provider (Vercel/Netlify will give you records to add).
-
-
-👉 Within a few hours, your portfolio will be live at your custom domain.
-
-🔹 6. Why This Portfolio Is Beginner-Friendly
-✅ All code is well-structured and commented line by line
- ✅ Built with modern tools (React + Tailwind + Framer Motion)
- ✅ Easy to customize (colors, animations, sections)
- ✅ Works perfectly on mobile, tablet, and desktop
- ✅ Free deployment with Vercel/Netlify in minutes
-
-🔹 7. Live Demo
-Before customizing, you can check the live version of this portfolio here:
- 👉 gauravbits.in
-
-🎯 Final Notes
-This portfolio is not just a template—it’s a ready-to-use professional website that can help you:
-Showcase your skills and projects
-
-
-Impress recruiters and clients
-
-
-Save weeks of design & development time
-
-
-With the included guides and comments in the code, you can make it truly yours in just a few hours.
-
-✨ You’re all set! Customize → Run Locally → Deploy → Go Live 🚀
-
+- Adicionar um honeypot (campo invisível) na API route para reduzir spam de bots
+- Adicionar páginas de case study completas por projeto (`app/projetos/[slug]/page.tsx`), continuando a estética de "request/response"
+- Adicionar fotos/mockups reais dos projetos como imagens dentro dos cards
+- Expandir o terminal com mais comandos (ex: `cat contato.txt`, `open instagram`)
